@@ -105,3 +105,5 @@ obj-$(CONFIG_MACH_XIAOMI_JASMINE)	+= lct_tp_fm_info.o
 obj-$(CONFIG_MACH_XIAOMI_JASMINE)	+= lct_ctp_selftest.o
 obj-$(CONFIG_MACH_XIAOMI_JASMINE)	+= lct_ctp_upgrade.o
 obj-$(CONFIG_MACH_XIAOMI_JASMINE)	+= lct_if_ctp_upgrade.o
+
+obj-$(CONFIG_SWEEP2SLEEP)		+= sweep2sleep.o

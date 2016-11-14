@@ -417,6 +417,7 @@ struct request_queue {
 	unsigned int		request_fn_active;
 
 	unsigned int		rq_timeout;
+	unsigned int		poll_nsec;
 	struct timer_list	timeout;
 	struct list_head	timeout_list;
 

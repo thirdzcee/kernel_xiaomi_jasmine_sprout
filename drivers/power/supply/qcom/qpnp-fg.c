@@ -337,14 +337,6 @@ module_param_named(
 	sram_update_period_ms, fg_sram_update_period_ms, int, 00600
 );
 
-static bool fg_batt_valid_ocv;
-module_param_named(batt_valid_ocv, fg_batt_valid_ocv, bool, 0600
-);
-
-static int fg_batt_range_pct;
-module_param_named(batt_range_pct, fg_batt_range_pct, int, 0600
-);
-
 struct fg_irq {
 	int			irq;
 	bool			disabled;
@@ -1325,8 +1317,8 @@ static int fg_check_ima_exception(struct fg_chip *chip, bool check_hw_sts)
 		ret = fg_run_iacs_clear_sequence(chip);
 		if (!ret)
 			return -EAGAIN;
-		else
-			pr_err("Error clearing IMA exception ret=%d\n", ret);
+
+		pr_err("Error clearing IMA exception ret=%d\n", ret);
 	}
 
 	return rc;
@@ -1473,15 +1465,13 @@ static int fg_check_iacs_ready(struct fg_chip *chip)
 	while (1) {
 		rc = fg_read(chip, &ima_opr_sts,
 			chip->mem_base + MEM_INTF_IMA_OPR_STS, 1);
-		if (!rc && (ima_opr_sts & IMA_IACS_RDY)) {
+		if (!rc && (ima_opr_sts & IMA_IACS_RDY))
 			break;
-		} else {
-			if (!(--timeout) || rc)
-				break;
 
-			/* delay for iacs_ready to be asserted */
-			usleep_range(5000, 7000);
-		}
+		if (!(--timeout) || rc)
+			break;
+		/* delay for iacs_ready to be asserted */
+		usleep_range(5000, 7000);
 	}
 
 	if (!timeout || rc) {
@@ -1511,16 +1501,15 @@ static int __fg_interleaved_mem_write(struct fg_chip *chip, u8 *val,
 
 	while (len > 0) {
 		num_bytes = (offset + len) > BUF_LEN ?
-				(BUF_LEN - offset) : len;
+			(BUF_LEN - offset) : len;
 		/* write to byte_enable */
 		for (i = offset; i < (offset + num_bytes); i++)
 			byte_enable |= BIT(i);
 
 		rc = fg_write(chip, &byte_enable,
-				chip->mem_base + MEM_INTF_IMA_BYTE_EN, 1);
+			chip->mem_base + MEM_INTF_IMA_BYTE_EN, 1);
 		if (rc) {
-			pr_err("Unable to write to byte_en_reg rc=%d\n",
-							rc);
+			pr_err("Unable to write to byte_en_reg rc=%d\n", rc);
 			return rc;
 		}
 			/* write data */
@@ -2011,7 +2000,6 @@ static void batt_to_setpoint_adc(int vbatt_mv, u8 *data)
 	val = DIV_ROUND_CLOSEST(vbatt_mv * 32768, 5000);
 	data[0] = val & 0xFF;
 	data[1] = val >> 8;
-	return;
 }
 
 static u8 batt_to_setpoint_8b(int vbatt_mv)

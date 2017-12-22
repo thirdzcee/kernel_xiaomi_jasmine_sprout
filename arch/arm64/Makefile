@@ -67,7 +67,7 @@ endif
 KBUILD_CFLAGS	+= $(call cc-option,-march=armv8-a+crypto+crc,) $(call cc-option,-mcpu=cortex-a53+crypto+crc,)
 
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= $(call clang-ifversion, -ge, 0600, -mgeneral-regs-only, -mno-implicit-float)
+KBUILD_CFLAGS	+= $(call clang-ifversion, -ge, 0600, -mgeneral-regs-only, -mno-implicit-float, -DCONFIG_ARCH_SUPPORTS_INT128)
 else
 KBUILD_CFLAGS	+= -mgeneral-regs-only
 endif

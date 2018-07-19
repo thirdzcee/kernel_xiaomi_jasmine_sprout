@@ -22,6 +22,7 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/gpio.h>
+#include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 #include <linux/input/mt.h>
 #include <linux/wakelock.h>

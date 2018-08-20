@@ -1719,6 +1719,7 @@ static void balance_dirty_pages(struct address_space *mapping,
 						  period,
 						  min(pause, 0L),
 						  start_time); */
+			;
 			if (pause < -HZ) {
 				current->dirty_paused_when = now;
 				current->nr_dirtied = 0;

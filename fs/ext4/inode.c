@@ -1055,9 +1055,9 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 						    inode);
 		trace_android_fs_datawrite_start(inode, pos, len,
 						 current->pid, path,
-						 current->comm);
-	}
-	trace_ext4_write_begin(inode, pos, len, flags); */
+						 current->comm); 
+	}*/
+//	trace_ext4_write_begin(inode, pos, len, flags);
 	/*
 	 * Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason
@@ -2786,9 +2786,9 @@ static int ext4_da_write_begin(struct file *file, struct address_space *mapping,
 						    inode);
 		trace_android_fs_datawrite_start(inode, pos, len,
 						 current->pid,
-						 path, current->comm);
-	}
-	trace_ext4_da_write_begin(inode, pos, len, flags); */
+						 path, current->comm); 
+	}*/
+//	trace_ext4_da_write_begin(inode, pos, len, flags);
 
 	if (ext4_test_inode_state(inode, EXT4_STATE_MAY_INLINE_DATA)) {
 		ret = ext4_da_write_inline_data_begin(mapping, inode,
@@ -3408,9 +3408,9 @@ static ssize_t ext4_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 						    inode);
 		trace_android_fs_dataread_start(inode, offset, count,
 						current->pid, path,
-						current->comm);
-	}
-	if (trace_android_fs_datawrite_start_enabled() &&
+						current->comm); 
+	}*/
+	/*if (trace_android_fs_datawrite_start_enabled() &&
 	    (iov_iter_rw(iter) == WRITE)) {
 		char *path, pathbuf[MAX_TRACE_PATHBUF_LEN];
 
@@ -3419,21 +3419,23 @@ static ssize_t ext4_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 						    inode);
 		trace_android_fs_datawrite_start(inode, offset, count,
 						 current->pid, path,
-						 current->comm);
-	}
-	trace_ext4_direct_IO_enter(inode, offset, count, iov_iter_rw(iter)); */
+						 current->comm); 
+	}*/
+//	trace_ext4_direct_IO_enter(inode, offset, count, iov_iter_rw(iter));
 	if (ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS))
 		ret = ext4_ext_direct_IO(iocb, iter, offset);
 	else
 		ret = ext4_ind_direct_IO(iocb, iter, offset);
-/*	trace_ext4_direct_IO_exit(inode, offset, count, iov_iter_rw(iter), ret);
+//	trace_ext4_direct_IO_exit(inode, offset, count, iov_iter_rw(iter), ret);
 
-	if (trace_android_fs_dataread_start_enabled() &&
-	    (iov_iter_rw(iter) == READ))
-		trace_android_fs_dataread_end(inode, offset, count);
-	if (trace_android_fs_datawrite_start_enabled() &&
-	    (iov_iter_rw(iter) == WRITE))
-		trace_android_fs_datawrite_end(inode, offset, count); */
+//	if (trace_android_fs_dataread_start_enabled() &&
+//	    (iov_iter_rw(iter) == READ)) {
+//		trace_android_fs_dataread_end(inode, offset, count);
+//	}
+//	if (trace_android_fs_datawrite_start_enabled() &&
+//	    (iov_iter_rw(iter) == WRITE)) {
+//		trace_android_fs_datawrite_end(inode, offset, count);
+//	}
 
 	return ret;
 }

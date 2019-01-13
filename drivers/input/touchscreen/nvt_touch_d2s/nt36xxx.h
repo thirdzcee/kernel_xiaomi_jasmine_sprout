@@ -26,6 +26,8 @@
 #include <linux/earlysuspend.h>
 #endif
 
+#define tianma_jdi_flag 0
+#define ESD_TE_status false
 #define NVT_DEBUG 1
 
 

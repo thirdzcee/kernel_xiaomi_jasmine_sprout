@@ -636,5 +636,10 @@
 		qcom,mdss-tear-check-rd-ptr-trigger-intr = <2161>;
 		qcom,panel-ack-disabled;
 
+		qcom,mdss-dsi-pan-enable-dynamic-bitclk;
+		qcom,mdss-dsi-dynamic-bitclk_freq = <798240576 801594528 804948480
+			808302432 811656384>;
+		qcom,mdss-dsi-pan-enable-dynamic-fps;
+		qcom,mdss-dsi-pan-fps-update = "dfps_immediate_porch_mode_vfp";
 	};
 };

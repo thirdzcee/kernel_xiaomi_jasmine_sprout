@@ -573,7 +573,6 @@ info_retry:
 
 	buf[0] = EVENT_MAP_FWINFO;
 	CTP_I2C_READ(ts->client, I2C_FW_Address, buf, 17);
-	ts->fw_ver = buf[1];
 	ts->x_num = buf[3];
 	ts->y_num = buf[4];
 	ts->abs_x_max = (uint16_t)((buf[5] << 8) | buf[6]);
@@ -583,7 +582,6 @@ info_retry:
 
 	if ((buf[1] + buf[2]) != 0xFF) {
 		NVT_ERR("FW info is broken! fw_ver=0x%02X, ~fw_ver=0x%02X\n", buf[1], buf[2]);
-		ts->fw_ver = 0;
 		ts->x_num = 18;
 		ts->y_num = 32;
 		ts->abs_x_max = TOUCH_DEFAULT_MAX_WIDTH;
@@ -1091,7 +1089,6 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 #if ((TOUCH_KEY_NUM > 0) || WAKEUP_GESTURE)
 	int32_t retry = 0;
 #endif
-	char fw_version[64];
 
 	NVT_LOG("start\n");
 
@@ -1277,13 +1274,6 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 			msecs_to_jiffies(NVT_TOUCH_ESD_CHECK_PERIOD));
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	if (tianma_jdi_flag == 0) {
-		memset(fw_version, 0, sizeof(fw_version));
-		sprintf(fw_version, "[FW]0x%02x,[IC]nvt36672", ts->fw_ver);
-	} else {
-		memset(fw_version, 0, sizeof(fw_version));
-		sprintf(fw_version, "[FW]0x%02x,[IC]nvt36672", ts->fw_ver);
-	}
 	ts->fb_notif.notifier_call = fb_notifier_callback;
 	INIT_WORK(&ts->pm_work, touch_pm_worker);
 	ret = fb_register_client(&ts->fb_notif);

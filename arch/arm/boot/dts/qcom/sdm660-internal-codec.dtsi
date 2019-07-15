@@ -46,9 +46,9 @@
 	status = "disabled";
 };
 
-&spi_7 {
+/*&spi_7 {
 	status = "disabled";
-};
+};*/
 
 &wdsp_mgr {
 	status = "disabled";

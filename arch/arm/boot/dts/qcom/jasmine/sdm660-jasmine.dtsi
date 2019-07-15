@@ -1,0 +1,43 @@
+/ {
+	reserved-memory {
+		pstore_reserve_mem: pstore_reserve_mem_region@0 {
+			linux,reserve-contiguous-region;
+			linux,reserve-region;
+			linux,remove-completely;
+			reg = <0x0 0xA0000000 0x0 0x00400000>;
+			label = "pstore_reserve_mem";
+		};
+	};
+};
+
+&soc {
+	/delete-node/ qcom,qbt1000;
+
+	qcom,sensor-information {
+		sensor_information22: qcom,sensor-information-22 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "backlight_therm";
+		};
+	};
+
+	sn_fuse: snfuse@0xA4128 {
+	compatible = "qcom,sn-fuse";
+	reg = <0x786134 0x4>,
+		<0x78607C 0x4>;
+	reg-names = "sn-base","fuse-state";
+	};
+};
+
+&qcom_seecom {
+	qcom,qsee-reentrancy-support = <0>;
+};
+
+&firmware {
+	android {
+		fstab {
+			vendor {
+				fsmgr_flags = "wait,slotselect";
+			};
+		};
+	};
+};

@@ -1,0 +1,42 @@
+&wcd934x_cdc {
+	/delete-node/ msm_cdc_pinctrl_usbc_audio_en1;
+	/delete-node/ msm_cdc_pinctrl_usbc_audio_en2;
+};
+
+&cdc_sdw_gpios {
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-1;
+};
+
+&wsa_spkr_en1 {
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-1;
+};
+
+&wsa_spkr_en2 {
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-1;
+};
+
+&msm_sdw_codec {
+	/delete-property/ qcom,cdc-sdw-gpios;
+};
+
+&wsa881x_211_en {
+	status = "disabled";
+};
+
+&wsa881x_212_en {
+	status = "disabled";
+};
+
+&wsa881x_213_en {
+	status = "disabled";
+};
+
+&wsa881x_214_en {
+	status = "disabled";
+};

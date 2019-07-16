@@ -30,3 +30,4 @@ obj-$(CONFIG_INPUT_KEYRESET)	+= keyreset.o
 obj-$(CONFIG_INPUT_KEYCOMBO)	+= keycombo.o
 obj-$(CONFIG_INPUT_HALL_SENSOR)	+= hall.o
 obj-y   += sensors/bmi160/
+obj-y	+= fingerprint/

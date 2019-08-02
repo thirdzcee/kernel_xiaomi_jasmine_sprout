@@ -116,3 +116,11 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+
+jasmine.sh
+wayne.sh
+/zip-jasmine
+/zip-wayne
+/build
+/build2
+/net/wireguard

@@ -614,8 +614,8 @@
 		qcom,mdss-dsi-post-init-delay = <1>;
 
 		qcom,mdss-dsi-panel-hdr-enabled;
-		qcom,mdss-dsi-panel-hdr-color-primaries = <14880 15935 32435
-			16555 14945 30910 7790 3415>;
+		qcom,mdss-dsi-panel-hdr-color-primaries = <0x3a5c 0x3dae 0x8408
+			0x3d54 0x2ac6 0x8408 0x1d1a 0x8fc>;
 		qcom,mdss-dsi-panel-peak-brightness = <5643000>;
 		qcom,mdss-dsi-panel-blackness-level = <6134>;
 		qcom,mdss-dsi-panel-status-command = [06 01 00 01 05 00 01 0A];

@@ -16,11 +16,11 @@
 		qcom,mdss-dsi-panel-name = "jdi nt36672 fhd video mode dsi panel";
 		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
 		qcom,mdss-dsi-panel-type = "dsi_video_mode";
-		qcom,mdss-dsi-panel-framerate = <60>;
+		qcom,mdss-dsi-panel-framerate = <75>;
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
-		qcom,mdss-dsi-panel-width = <1080>;
-		qcom,mdss-dsi-panel-height = <2160>;
+		qcom,mdss-dsi-panel-width = <720>;
+		qcom,mdss-dsi-panel-height = <1440>;
 		qcom,mdss-pan-physical-width-dimension = <68>;
 		qcom,mdss-pan-physical-height-dimension = <136>;
 		qcom,mdss-dsi-h-front-porch = <96>;
@@ -616,8 +616,8 @@
 		qcom,mdss-dsi-panel-hdr-enabled;
 		qcom,mdss-dsi-panel-hdr-color-primaries = <	0x0d26 0x3399 0x339933
 			0x3333 0x33cc 0x249924 0x356261 0x00ff>;
-		qcom,mdss-dsi-panel-peak-brightness = <5643000>;
-		qcom,mdss-dsi-panel-blackness-level = <6134>;
+		qcom,mdss-dsi-panel-peak-brightness = <0x6acfc0>;
+		qcom,mdss-dsi-panel-blackness-level = <0x1226>;
 		qcom,mdss-dsi-panel-status-command = [06 01 00 01 05 00 01 0A];
 		qcom,mdss-dsi-panel-status-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-panel-status-check-mode = "reg_read";

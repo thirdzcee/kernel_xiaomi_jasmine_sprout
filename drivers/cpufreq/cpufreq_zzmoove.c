@@ -31,21 +31,21 @@
 #include "cpufreq_governor.h"
 
 // ZZ: for version information tunable
-#define ZZMOOVE_VERSION "bLE-develop-k4xx-110717"
+#define ZZMOOVE_VERSION "bLE-develop-k4xx-110717-Neocore-tweaked"
 
 /* ZZMoove governor macros */
-#define DEF_FREQUENCY_UP_THRESHOLD		(80)
-#define DEF_FREQUENCY_DOWN_THRESHOLD		(40)
+#define DEF_FREQUENCY_UP_THRESHOLD		(90)
+#define DEF_FREQUENCY_DOWN_THRESHOLD		(60)
 #define DEF_SAMPLING_DOWN_FACTOR		(1)
 #define MAX_SAMPLING_DOWN_FACTOR		(10)
 #define DEF_SMOOTH_UP				(75)	// ZZ: default cpu load trigger for 'boosting' scaling frequency
 #define DEF_SCALING_PROPORTIONAL		(0)	// ZZ: default for proportional scaling, disabled here
 #define DEF_FAST_SCALING_UP			(0)	// Yank: default fast scaling for upscaling
-#define DEF_FAST_SCALING_DOWN			(0)	// Yank: default fast scaling for downscaling
+#define DEF_FAST_SCALING_DOWN			(1)	// Yank: default fast scaling for downscaling
 #define DEF_AFS_THRESHOLD1			(25)	// ZZ: default auto fast scaling step one
-#define DEF_AFS_THRESHOLD2			(50)	// ZZ: default auto fast scaling step two
-#define DEF_AFS_THRESHOLD3			(75)	// ZZ: default auto fast scaling step three
-#define DEF_AFS_THRESHOLD4			(90)	// ZZ: default auto fast scaling step four
+#define DEF_AFS_THRESHOLD2			(45)	// ZZ: default auto fast scaling step two
+#define DEF_AFS_THRESHOLD3			(60)	// ZZ: default auto fast scaling step three
+#define DEF_AFS_THRESHOLD4			(75)	// ZZ: default auto fast scaling step four
 
 static DEFINE_PER_CPU(struct zz_cpu_dbs_info_s, zz_cpu_dbs_info);
 

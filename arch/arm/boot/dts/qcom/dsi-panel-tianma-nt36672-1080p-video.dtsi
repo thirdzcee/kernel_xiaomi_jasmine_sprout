@@ -1278,10 +1278,10 @@
 		qcom,mdss-dsi-post-init-delay = <1>;
 
 		qcom,mdss-dsi-panel-hdr-enabled;
-		qcom,mdss-dsi-panel-hdr-color-primaries = <14500 15500 32000
-			17000 15500 30000 8000 3000>;
-		qcom,mdss-dsi-panel-peak-brightness = <4300000>;
-		qcom,mdss-dsi-panel-blackness-level = <3230>;
+		qcom,mdss-dsi-panel-hdr-color-primaries = <	0x0d26 0x3399 0x339933
+			0x3333 0x33cc 0x249924 0x356261 0x00ff>;
+		qcom,mdss-dsi-panel-peak-brightness = <0x6acfc0>;
+		qcom,mdss-dsi-panel-blackness-level = <0x1226>;
 		qcom,mdss-dsi-panel-status-command = [06 01 00 01 05 00 01 0A];
 		qcom,mdss-dsi-panel-status-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-panel-status-check-mode = "reg_read";

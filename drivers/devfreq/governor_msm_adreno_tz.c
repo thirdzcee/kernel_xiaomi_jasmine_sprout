@@ -343,7 +343,7 @@ static int tz_init(struct devfreq_msm_adreno_tz_data *priv,
 }
 
 static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
-								u32 *flag)
+								u32 *flag);
 
 
 #ifdef CONFIG_ADRENO_IDLER

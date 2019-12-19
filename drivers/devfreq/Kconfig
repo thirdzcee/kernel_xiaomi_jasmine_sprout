@@ -82,7 +82,6 @@ config DEVFREQ_GOV_CPUFREQ
 
 config SIMPLE_GPU_ALGORITHM
 	bool "Simple GPU algorithm"
-	depends on DEVFREQ_GOV_MSM_ADRENO_TZ
 	help
 	  Simple user configurable GPU controlling algorithm
 
@@ -242,12 +241,6 @@ config SPDM_SCM
 	  scm or hvc calls. This adds the support for SPDM interaction to
           tz via SCM based call. If not selected then Hypervior interaction
           will be activated.
-
-config SIMPLE_GPU_ALGORITHM
-	bool "Simple GPU algorithm"
-	depends on DEVFREQ_GOV_MSM_ADRENO_TZ
-	help
-	  Simple user configurable GPU controlling algorithm
 
 config DEVFREQ_SPDM
 	bool "QCOM SPDM based bandwidth voting"

@@ -118,6 +118,8 @@ all.config
 android/configs/android-*.cfg
 
 jasmine.sh
+wayne.sh
 /zip-jasmine
+/zip-wayne
 /build
 /net/wireguard

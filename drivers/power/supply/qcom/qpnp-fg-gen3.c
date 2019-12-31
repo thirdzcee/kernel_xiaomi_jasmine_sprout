@@ -407,11 +407,6 @@ module_param_named(
 
 static int fg_restart;
 static bool fg_sram_dump;
- int hwc_check_india;
- int hwc_check_global;
-extern bool is_poweroff_charge;
-
-#define FG_RATE_LIM_MS (10 * MSEC_PER_SEC)
 
 /* All getters HERE */
 
@@ -650,66 +645,13 @@ static int fg_get_battery_temp(struct fg_chip *chip, int *val)
 			BATT_INFO_BATT_TEMP_LSB(chip), rc);
 		return rc;
 	}
-		pr_err("addr=0x%04x,buf1=%04x buf0=%04x\n",
-			BATT_INFO_BATT_TEMP_LSB(chip), buf[1], buf[0]);
+
 	temp = ((buf[1] & BATT_TEMP_MSB_MASK) << 8) |
 		(buf[0] & BATT_TEMP_LSB_MASK);
 	temp = DIV_ROUND_CLOSEST(temp, 4);
 
 	/* Value is in Kelvin; Convert it to deciDegC */
 	temp = (temp - 273) * 10;
-		pr_err("LCT TEMP=%d\n", temp);
-
-#if defined(CONFIG_KERNEL_CUSTOM_E7T)
-	if (temp < -40){
-		switch (temp){
-		case -50:
-			temp = -70;
-			break;
-		case -60:
-			temp = -80;
-			break;
-		case -70:
-			temp = -90;
-			break;
-		case -80:
-			temp = -100;
-			break;
-#else
-	if (temp < -80){
-		switch (temp){
-#endif
-		case -90:
-			temp = -110;
-			break;
-		case -100:
-			temp = -120;
-			break;
-		case -110:
-			temp = -130;
-			break;
-		case -120:
-			temp = -150;
-			break;
-		case -130:
-			temp = -170;
-			break;
-		case -140:
-			temp = -190;
-			break;
-		case -150:
-			temp = -200;
-			break;
-		case -160:
-			temp = -210;
-			break;
-		default:
-			temp -= 50;
-			break;
-		};
-	}
-
-
 	*val = temp;
 	return 0;
 }
@@ -818,10 +760,6 @@ static int fg_get_msoc_raw(struct fg_chip *chip, int *val)
 
 #define FULL_CAPACITY	100
 #define FULL_SOC_RAW	255
-#if defined(CONFIG_MACH_XIAOMI_JASMINE) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-#define FULL_SOC_REPORT_THR 250
-#endif
-
 static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 {
 	int rc;
@@ -829,29 +767,7 @@ static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 	rc = fg_get_msoc_raw(chip, msoc);
 	if (rc < 0)
 		return rc;
-#if defined(CONFIG_MACH_XIAOMI_JASMINE) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-	/*
-       * To have better endpoints for 0 and 100, it is good to tune the
-       * calculation discarding values 0 and 255 while rounding off. Rest
-       * of the values 1-254 will be scaled to 1-99. DIV_ROUND_UP will not
-       * be suitable here as it rounds up any value higher than 252 to 100.
-       */
-      if ((*msoc >= FULL_SOC_REPORT_THR - 2)
-					  && (*msoc < FULL_SOC_RAW) && chip->report_full) {
-			  *msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY, FULL_SOC_RAW) + 1;
-			  if (*msoc >= FULL_CAPACITY)
-					  *msoc = FULL_CAPACITY;
-      } else if (*msoc == FULL_SOC_RAW)
-			  *msoc = 100;
-      else if (*msoc == 0)
-			  *msoc = 0;
-      else if (*msoc >= FULL_SOC_REPORT_THR - 4 && *msoc <= FULL_SOC_REPORT_THR - 3 && chip->report_full) {
-			  *msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY, FULL_SOC_RAW);
-      } else {
-			  *msoc = DIV_ROUND_CLOSEST((*msoc - 1) * (FULL_CAPACITY - 2),
-					          FULL_SOC_RAW - 2) + 1;
-      }
-#else
+
 	/*
 	 * To have better endpoints for 0 and 100, it is good to tune the
 	 * calculation discarding values 0 and 255 while rounding off. Rest
@@ -865,7 +781,6 @@ static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 	else
 		*msoc = DIV_ROUND_CLOSEST((*msoc - 1) * (FULL_CAPACITY - 2),
 				FULL_SOC_RAW - 2) + 1;
-#endif
 	return 0;
 }
 
@@ -1062,20 +977,6 @@ out:
 	vote(chip->batt_miss_irq_en_votable, BATT_MISS_IRQ_VOTER, true, 0);
 	return rc;
 }
-static int __init hwc_setup(char *s)
-{
-	if (strcmp(s, "India") == 0)
-		hwc_check_india = 1;
-	else
-		hwc_check_india = 0;
-	if (strcmp(s, "Global") == 0)
-		hwc_check_global = 1;
-	else
-		hwc_check_global = 0;
-	return 1;
-}
-
-__setup("androidboot.hwc=", hwc_setup);
 
 static int fg_get_batt_profile(struct fg_chip *chip)
 {
@@ -1114,26 +1015,13 @@ static int fg_get_batt_profile(struct fg_chip *chip)
 		chip->bp.float_volt_uv = -EINVAL;
 	}
 
-	if (hwc_check_global){
-		pr_err("sunxing get global set fastchg  2.3A");
-		chip->bp.fastchg_curr_ma = 3000;
-	}else{
-		rc = of_property_read_u32(profile_node, "qcom,fastchg-current-ma",
+	rc = of_property_read_u32(profile_node, "qcom,fastchg-current-ma",
 			&chip->bp.fastchg_curr_ma);
-#if defined(CONFIG_KERNEL_CUSTOM_E7T)
-		if (is_poweroff_charge == true)
-		{
-			if (hwc_check_india == 1)
-				chip->bp.fastchg_curr_ma = 2200;
-			else
-				chip->bp.fastchg_curr_ma = 2300;
-		}
-#endif
-		if (rc < 0) {
-			pr_err("battery fastchg current unavailable, rc:%d\n", rc);
-			chip->bp.fastchg_curr_ma = -EINVAL;
-		}
+	if (rc < 0) {
+		pr_err("battery fastchg current unavailable, rc:%d\n", rc);
+		chip->bp.fastchg_curr_ma = -EINVAL;
 	}
+
 	rc = of_property_read_u32(profile_node, "qcom,fg-cc-cv-threshold-mv",
 			&chip->bp.vbatt_full_mv);
 	if (rc < 0) {
@@ -1143,12 +1031,6 @@ static int fg_get_batt_profile(struct fg_chip *chip)
 
 	data = of_get_property(profile_node, "qcom,fg-profile-data", &len);
 	if (!data) {
-		pr_err("No profile data available\n");
-		return -ENODATA;
-	}
-
-	rc = of_property_read_u32(profile_node, "qcom,battery-full-design", &chip->battery_full_design);
-	if (rc < 0) {
 		pr_err("No profile data available\n");
 		return -ENODATA;
 	}
@@ -2266,22 +2148,9 @@ static int fg_adjust_recharge_voltage(struct fg_chip *chip)
 	recharge_volt_mv = chip->dt.recharge_volt_thr_mv;
 
 	/* Lower the recharge voltage in soft JEITA */
-#if defined(CONFIG_KERNEL_CUSTOM_E7S)
-	if (chip->health == POWER_SUPPLY_HEALTH_WARM)
-		recharge_volt_mv = 4050;
-	if (chip->health == POWER_SUPPLY_HEALTH_COOL)
-		recharge_volt_mv = 4250;
-#elif defined(CONFIG_KERNEL_CUSTOM_E7T)
-if (chip->health == POWER_SUPPLY_HEALTH_WARM)
-	recharge_volt_mv = 4050;
-if (chip->health == POWER_SUPPLY_HEALTH_COOL)
-	recharge_volt_mv = 4250;
-#else
-	if (chip->health == POWER_SUPPLY_HEALTH_WARM)
-		recharge_volt_mv = 4050;
-	 if (chip->health == POWER_SUPPLY_HEALTH_COOL)
-			  recharge_volt_mv = 4250 ;
-#endif
+	if (chip->health == POWER_SUPPLY_HEALTH_WARM ||
+			chip->health == POWER_SUPPLY_HEALTH_COOL)
+		recharge_volt_mv -= 200;
 
 	rc = fg_set_recharge_voltage(chip, recharge_volt_mv);
 	if (rc < 0) {
@@ -2844,9 +2713,6 @@ static void status_change_work(struct work_struct *work)
 			struct fg_chip, status_change_work);
 	union power_supply_propval prop = {0, };
 	int rc, batt_temp;
-	#if defined(CONFIG_MACH_XIAOMI_JASMINE) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-	int msoc;
-	#endif
 
 	if (!batt_psy_initialized(chip)) {
 		fg_dbg(chip, FG_STATUS, "Charger not available?!\n");
@@ -2879,17 +2745,7 @@ static void status_change_work(struct work_struct *work)
 	chip->charge_done = prop.intval;
 	fg_cycle_counter_update(chip);
 	fg_cap_learning_update(chip);
-#if defined(CONFIG_MACH_XIAOMI_JASMINE) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-	if (chip->charge_done && !chip->report_full) {
-					 chip->report_full = true;
-			 } else if (!chip->charge_done && chip->report_full) {
-					 rc = fg_get_msoc_raw(chip, &msoc);
-					 if (rc < 0)
-							 pr_err("Error in getting msoc, rc=%d\n", rc);
-					 if (msoc < FULL_SOC_REPORT_THR - 4)
-							 chip->report_full = false;
-			 }
-#endif
+
 	rc = fg_charge_full_update(chip);
 	if (rc < 0)
 		pr_err("Error in charge_full_update, rc=%d\n", rc);
@@ -3877,33 +3733,7 @@ static int fg_psy_get_property(struct power_supply *psy,
 				       union power_supply_propval *pval)
 {
 	struct fg_chip *chip = power_supply_get_drvdata(psy);
-	struct fg_saved_data *sd = chip->saved_data + psp;
-	union power_supply_propval typec_sts = { .intval = -1 };
 	int rc = 0;
-
-	switch (psp) {
-	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
-	case POWER_SUPPLY_PROP_RESISTANCE_ID:
-	case POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN:
-	case POWER_SUPPLY_PROP_CYCLE_COUNT_ID:
-	case POWER_SUPPLY_PROP_CHARGE_NOW:
-	case POWER_SUPPLY_PROP_CHARGE_FULL:
-	case POWER_SUPPLY_PROP_SOC_REPORTING_READY:
-		/* These props don't require a fg query; don't ratelimit them */
-		break;
-	default:
-		if (!sd->last_req_expires)
-			break;
- 		if (usb_psy_initialized(chip))
-			power_supply_get_property(chip->usb_psy,
-				POWER_SUPPLY_PROP_TYPEC_MODE, &typec_sts);
- 		if (typec_sts.intval == POWER_SUPPLY_TYPEC_NONE &&
-			time_before(jiffies, sd->last_req_expires)) {
-			*pval = sd->val;
-			return 0;
-		}
-		break;
-	}
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_CAPACITY:
@@ -4028,9 +3858,6 @@ static int fg_psy_get_property(struct power_supply *psy,
 
 	if (rc < 0)
 		return -ENODATA;
-
-	sd->val = *pval;
-	sd->last_req_expires = jiffies + msecs_to_jiffies(FG_RATE_LIM_MS);
 
 	return 0;
 }
@@ -4711,8 +4538,7 @@ static irqreturn_t fg_delta_msoc_irq_handler(int irq, void *data)
 {
 	struct fg_chip *chip = data;
 	int rc;
-	int msoc, volt_uv, batt_temp, ibatt_now ;
-	bool input_present;
+
 	fg_dbg(chip, FG_IRQ, "irq %d triggered\n", irq);
 	fg_cycle_counter_update(chip);
 
@@ -4741,21 +4567,6 @@ static irqreturn_t fg_delta_msoc_irq_handler(int irq, void *data)
 
 	if (batt_psy_initialized(chip))
 		power_supply_changed(chip->batt_psy);
-
-	input_present = is_input_present(chip);
-	rc = fg_get_battery_voltage(chip, &volt_uv);
-	if (!rc)
-		rc = fg_get_prop_capacity(chip, &msoc);
-
-	if (!rc)
-		rc = fg_get_battery_temp(chip, &batt_temp);
-
-	if (!rc)
-		rc = fg_get_battery_current(chip, &ibatt_now);
-
-	if (!rc)
-		pr_err("lct battery SOC:%d voltage:%duV current:%duA temp:%d id:%dK charge_status:%d charge_type:%d health:%d input_present:%d \n",
-			msoc, volt_uv, ibatt_now, batt_temp, chip->batt_id_ohms / 1000, chip->charge_status, chip->charge_type, chip->health, input_present);
 
 	return IRQ_HANDLED;
 }
@@ -5027,8 +4838,8 @@ static int fg_parse_ki_coefficients(struct fg_chip *chip)
 #define DEFAULT_RECHARGE_SOC_THR	95
 #define DEFAULT_BATT_TEMP_COLD		0
 #define DEFAULT_BATT_TEMP_COOL		5
-#define DEFAULT_BATT_TEMP_WARM		50
-#define DEFAULT_BATT_TEMP_HOT		60
+#define DEFAULT_BATT_TEMP_WARM		45
+#define DEFAULT_BATT_TEMP_HOT		50
 #define DEFAULT_CL_START_SOC		15
 #define DEFAULT_CL_MIN_TEMP_DECIDEGC	150
 #define DEFAULT_CL_MAX_TEMP_DECIDEGC	450
@@ -5179,7 +4990,7 @@ static int fg_parse_dt(struct fg_chip *chip)
 	if (rc < 0)
 		chip->dt.sys_term_curr_ma = DEFAULT_SYS_TERM_CURR_MA;
 	else
-		chip->dt.sys_term_curr_ma = -temp;
+		chip->dt.sys_term_curr_ma = temp;
 
 	rc = of_property_read_u32(node, "qcom,fg-chg-term-base-current", &temp);
 	if (rc < 0)
@@ -5599,14 +5410,12 @@ static int fg_gen3_probe(struct platform_device *pdev)
 	/* Keep BATT_MISSING_IRQ disabled until we require it */
 	vote(chip->batt_miss_irq_en_votable, BATT_MISS_IRQ_VOTER, false, 0);
 
-#ifdef CONFIG_DEBUG_FS
 	rc = fg_debugfs_create(chip);
 	if (rc < 0) {
 		dev_err(chip->dev, "Error in creating debugfs entries, rc:%d\n",
 			rc);
 		goto exit;
 	}
-#endif
 
 	rc = fg_get_battery_voltage(chip, &volt_uv);
 	if (!rc)

@@ -1116,7 +1116,7 @@ static int fg_get_batt_profile(struct fg_chip *chip)
 
 	if (hwc_check_global){
 		pr_err("sunxing get global set fastchg  2.3A");
-		chip->bp.fastchg_curr_ma = 2300;
+		chip->bp.fastchg_curr_ma = 2900;
 	}else{
 		rc = of_property_read_u32(profile_node, "qcom,fastchg-current-ma",
 			&chip->bp.fastchg_curr_ma);

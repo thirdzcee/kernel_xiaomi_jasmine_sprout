@@ -265,7 +265,7 @@ static int smb2_parse_dt(struct smb2 *chip)
 
 	if (hwc_check_global){
 		pr_err("sunxing get global set fcc max 2.3A");
-		chg->batt_profile_fcc_ua = 2900000;
+		chg->batt_profile_fcc_ua = 3000000;
 	}else{
 	rc = of_property_read_u32(node,
 				"qcom,fcc-max-ua", &chg->batt_profile_fcc_ua);

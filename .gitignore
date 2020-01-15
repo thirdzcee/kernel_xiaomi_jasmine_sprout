@@ -119,8 +119,10 @@ android/configs/android-*.cfg
 
 jasmine.sh
 wayne.sh
+miui.sh
 /zip-jasmine
 /zip-wayne
 /build
+/build1
 /build2
 /net/wireguard

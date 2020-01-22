@@ -17,6 +17,20 @@
 #include <uapi/linux/sched/types.h>
 #endif
 
+/* SEND_SIG_FORCED isn't present in newer kernels */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+#define SIG_INFO_TYPE SEND_SIG_FORCED
+#else
+#define SIG_INFO_TYPE SEND_SIG_PRIV
+#endif
+
+/* The group argument to do_send_sig_info is different in newer kernels */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 18, 0)
+#define KILL_GROUP_TYPE true
+#else
+#define KILL_GROUP_TYPE PIDTYPE_TGID
+#endif
+
 /* The minimum number of pages to free per reclaim */
 #define MIN_FREE_PAGES (CONFIG_ANDROID_SIMPLE_LMK_MINFREE * SZ_1M / PAGE_SIZE)
 
@@ -196,10 +210,26 @@ static void scan_and_kill(unsigned long pages_needed)
 			vtsk->signal->oom_score_adj,
 			victim->size << (PAGE_SHIFT - 10));
 
-		/* Send kill signal to the victim */
-		send_sig(SIGKILL, vtsk, 0);
+		/* Accelerate the victim's death by forcing the kill signal */
+		do_send_sig_info(SIGKILL, SIG_INFO_TYPE, vtsk, KILL_GROUP_TYPE);
 
+		/* Grab a reference to the victim for later before unlocking */
+		get_task_struct(vtsk);
 		task_unlock(vtsk);
+	}
+
+	/* Try to speed up the death process now that we can schedule again */
+	for (i = 0; i < nr_to_kill; i++) {
+		struct task_struct *vtsk = victims[i].tsk;
+
+		/* Increase the victim's priority to make it die faster */
+		set_user_nice(vtsk, MIN_NICE);
+
+		/* Allow the victim to run on any CPU */
+		set_cpus_allowed_ptr(vtsk, cpu_all_mask);
+
+		/* Finally release the victim reference acquired earlier */
+		put_task_struct(vtsk);
 	}
 
 	/* Wait until all the victims die */
@@ -215,8 +245,9 @@ static int simple_lmk_reclaim_thread(void *data)
 	sched_setscheduler_nocheck(current, SCHED_FIFO, &sched_max_rt_prio);
 
 	while (1) {
-		wait_event(oom_waitq, atomic_add_unless(&needs_reclaim, -1, 0));
+		wait_event(oom_waitq, atomic_read_acquire(&needs_reclaim));
 		scan_and_kill(MIN_FREE_PAGES);
+		atomic_set_release(&needs_reclaim, 0);
 	}
 
 	return 0;
@@ -224,18 +255,9 @@ static int simple_lmk_reclaim_thread(void *data)
 
 void simple_lmk_decide_reclaim(int kswapd_priority)
 {
-	if (kswapd_priority == CONFIG_ANDROID_SIMPLE_LMK_AGGRESSION) {
-		int v, v1;
-
-		for (v = 0;; v = v1) {
-			v1 = atomic_cmpxchg(&needs_reclaim, v, v + 1);
-			if (likely(v1 == v)) {
-				if (!v)
-					wake_up(&oom_waitq);
-				break;
-			}
-		}
-	}
+	if (kswapd_priority == CONFIG_ANDROID_SIMPLE_LMK_AGGRESSION &&
+	    !atomic_cmpxchg(&needs_reclaim, 0, 1))
+		wake_up(&oom_waitq);
 }
 
 void simple_lmk_mm_freed(struct mm_struct *mm)
@@ -263,11 +285,10 @@ static int simple_lmk_init_set(const char *val, const struct kernel_param *kp)
 	struct task_struct *thread;
 
 	if (!atomic_cmpxchg(&init_done, 0, 1)) {
-		thread = kthread_run_perf_critical(simple_lmk_reclaim_thread,
-						   NULL, "simple_lmkd");
+		thread = kthread_run(simple_lmk_reclaim_thread, NULL,
+				     "simple_lmkd");
 		BUG_ON(IS_ERR(thread));
 	}
-
 	return 0;
 }
 

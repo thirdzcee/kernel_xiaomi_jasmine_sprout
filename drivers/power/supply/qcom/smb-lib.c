@@ -30,11 +30,6 @@
 #include <linux/fastchg.h>
 #endif
 
-#ifdef CONFIG_FORCE_FAST_CHARGE
-#include <linux/fastchg.h>
-#endif
-
-#ifdef DEBUG
 #define smblib_err(chg, fmt, ...)		\
 	pr_err("%s: %s: " fmt, chg->name,	\
 		__func__, ##__VA_ARGS__)	\
@@ -48,10 +43,6 @@
 			pr_debug("%s: %s: " fmt, chg->name,	\
 				__func__, ##__VA_ARGS__);	\
 	} while (0)
-#else
-#define smblib_err(chg, fmt, ...) do {} while (0)
-#define smblib_dbg(chg, reason, fmt, ...) do {} while (0)
-#endif
 
 static bool is_secure(struct smb_charger *chg, int addr)
 {
@@ -200,7 +191,7 @@ int smblib_get_usb_suspend(struct smb_charger *chg, int *suspend)
 }
 
 struct apsd_result {
-	const char * name;
+	const char * const name;
 	const u8 bit;
 	const enum power_supply_type pst;
 };
@@ -1116,8 +1107,13 @@ static int smblib_hvdcp_enable_vote_callback(struct votable *votable,
 	/* vote to enable/disable HW autonomous INOV */
 	vote(chg->hvdcp_hw_inov_dis_votable, client, !hvdcp_enable, 0);
 
+	/*
+	 * Disable the autonomous bit and auth bit for disabling hvdcp.
+	 * This ensures only qc 2.0 detection runs but no vbus
+	 * negotiation happens.
+	 */
 	if (!hvdcp_enable)
-		val = 0;
+		val = HVDCP_EN_BIT;
 
 	rc = smblib_masked_write(chg, USBIN_OPTIONS_1_CFG_REG,
 				 HVDCP_EN_BIT | HVDCP_AUTH_ALG_EN_CFG_BIT,
@@ -1728,6 +1724,8 @@ int smblib_get_prop_batt_health(struct smb_charger *chg,
 			rc);
 		return rc;
 	}
+	smblib_dbg(chg, PR_REGISTER, "BATTERY_CHARGER_STATUS_2 = 0x%02x\n",
+		   stat);
 
 	if (stat & CHARGER_ERROR_STATUS_BAT_OV_BIT) {
 		rc = smblib_get_prop_from_bms(chg,
@@ -3151,7 +3149,6 @@ int smblib_get_prop_slave_current_now(struct smb_charger *chg,
  * INTERRUPT HANDLERS *
  **********************/
 
-#ifdef DEBUG
 irqreturn_t smblib_handle_debug(int irq, void *data)
 {
 	struct smb_irq_data *irq_data = data;
@@ -3160,12 +3157,6 @@ irqreturn_t smblib_handle_debug(int irq, void *data)
 	smblib_dbg(chg, PR_INTERRUPT, "IRQ: %s\n", irq_data->name);
 	return IRQ_HANDLED;
 }
-#else
-inline irqreturn_t smblib_handle_debug(__attribute__((unused)) int irq, __attribute__((unused)) void *data)
-{
-	return IRQ_HANDLED;
-}
-#endif
 
 irqreturn_t smblib_handle_otg_overcurrent(int irq, void *data)
 {

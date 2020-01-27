@@ -264,7 +264,7 @@ static int devfreq_memlat_get_freq(struct devfreq *df,
 //					hw->core_stats[lat_dev].mem_count,
 //					hw->core_stats[lat_dev].freq,
 //					max_freq);
-//	}
+	}
 
 	*freq = max_freq;
 	return 0;

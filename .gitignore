@@ -116,3 +116,10 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+
+#neocore
+memeui.sh
+miui.sh
+net/wireguard/
+stock.sh
+wayne.sh

@@ -1499,6 +1499,9 @@ static ssize_t disksize_store(struct device *dev,
 		goto out_unlock;
 	}
 
+	if (disksize > 1073741824) /* Miui Sets 2361393152 = 2252MB which is unnecessary */
+		disksize = 1073741824; /* set 1GB max size possible */
+
 	disksize = PAGE_ALIGN(disksize);
 	if (!zram_meta_alloc(zram, disksize)) {
 		err = -ENOMEM;

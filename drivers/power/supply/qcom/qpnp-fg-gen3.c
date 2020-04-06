@@ -406,7 +406,7 @@ module_param_named(
 );
 
 static int fg_restart;
-static bool fg_sram_dump;
+static bool fg_sram_dump = false;
  int hwc_check_india;
  int hwc_check_global;
 extern bool is_poweroff_charge;

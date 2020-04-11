@@ -92,6 +92,10 @@ config IOSCHED_SWITCHER
 	  in order to grab the request_queue pointer that should have its I/O
 	  scheduler switched to Noop when the screen turns off.
 
+config IOSCHED_ROW
+	tristate "ROW I/O scheduler"
+	default y
+
 choice
 	prompt "Default I/O scheduler"
 	default DEFAULT_CFQ
@@ -121,6 +125,9 @@ choice
 	config DEFAULT_NOOP
 		bool "No-op" if IOSCHED_NOOP=y
 
+	config DEFAULT_ROW
+		bool "ROW" if IOSCHED_ROW=y
+
 endchoice
 
 config DEFAULT_IOSCHED
@@ -130,6 +137,7 @@ config DEFAULT_IOSCHED
 	default "bfq" if DEFAULT_BFQ
 	default "anxiety" if DEFAULT_ANXIETY
 	default "noop" if DEFAULT_NOOP
+	default "row" if DEFAULT_ROW
 
 endmenu
 

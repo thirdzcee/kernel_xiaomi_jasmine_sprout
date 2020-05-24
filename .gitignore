@@ -119,9 +119,3 @@ android/configs/android-*.cfg
 
 # Clang's compilation database file
 /compile_commands.json
-out/
-*.sh
-clang-llvm/
-AnyKernel2/
-error.log
-gcc*/

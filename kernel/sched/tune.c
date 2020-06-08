@@ -590,6 +590,9 @@ boost_write(struct cgroup_subsys_state *css, struct cftype *cft,
 	unsigned threshold_idx;
 	int boost_pct;
 
+	if (!strcmp(css->cgroup->kn->name, "top-app"))
+		boost = 20;
+
 	if (boost < -100 || boost > 100)
 		return -EINVAL;
 	boost_pct = boost;
@@ -663,7 +666,7 @@ static void write_default_values(struct cgroup_subsys_state *css)
 	};
 
 	struct groups_data groups[3] = {
-		{ "top-app",	1, 1 },
+		{ "top-app",	20, 1 },
 		{ "foreground", 0, 1 },
 		{ "background", 0, 0 }};
 

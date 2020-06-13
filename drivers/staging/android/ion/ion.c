@@ -339,7 +339,6 @@ static const struct dma_buf_ops ion_dma_buf_ops = {
 	.end_cpu_access = ion_dma_buf_end_cpu_access,
 	.kmap_atomic = ion_dma_buf_kmap,
 	.kmap = ion_dma_buf_kmap,
-	.get_flags = ion_dma_buf_get_flags,
 	.kmap = ion_dma_buf_kmap
 };
 

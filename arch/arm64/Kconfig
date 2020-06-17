@@ -216,6 +216,13 @@ config ARM64_DMA_USE_IOMMU
 	bool
 	select ARM_HAS_SG_CHAIN
 	select NEED_SG_DMA_LENGTH
+	
+config MEMEUI
+    default n
+       bool "memeui fixes"
+     help
+             meme ui fixes for A2.
+
 
 if ARM64_DMA_USE_IOMMU
 

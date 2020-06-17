@@ -1,0 +1,5 @@
+include wayne_defconfig
+include neocore_defconfig
+
+CONFIG_MEMEUI=y
+CONFIG_MACH_XIAOMI_NEW_CAMERA=n
